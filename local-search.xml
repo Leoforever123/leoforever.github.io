@@ -4,6 +4,35 @@
   
   
   <entry>
+    <title>Reputation system in P2P computing: A literature review</title>
+    <link href="/leoforever.github.io/2025/05/04/Reputation-system-in-P2P-computing-A-literature-review/"/>
+    <url>/leoforever.github.io/2025/05/04/Reputation-system-in-P2P-computing-A-literature-review/</url>
+    
+    <content type="html"><![CDATA[<h1 id="Reputation-system-in-P2P-computing-A-literature-review"><a href="#Reputation-system-in-P2P-computing-A-literature-review" class="headerlink" title="Reputation system in P2P computing: A literature review"></a>Reputation system in P2P computing: A literature review</h1><h2 id="Related-Work"><a href="#Related-Work" class="headerlink" title="Related Work"></a>Related Work</h2><h3 id="Managing-trust-in-a-peer-2-peer-information-system"><a href="#Managing-trust-in-a-peer-2-peer-information-system" class="headerlink" title="Managing trust in a peer-2-peer information system"></a>Managing trust in a peer-2-peer information system</h3><p>在本文中，作者将声誉问题分解为三个子问题：</p><ul><li>什么样的节点是可靠可信的，全局信任模型</li><li>节点在本地可以获取的信息中，执行什么算法来判断其他节点的可信度，这里主要面临几个问题：<ul><li>节点正常只能从直接相连的节点获取行为数据</li><li>获取的行为数据本身也可能造假</li></ul></li><li>获取数据和运行算法的效率，这影响整个系统的可扩展性</li></ul><p>作者首先假定信任模型为二元信任模型，即节点要么值得信任，要么不值得信任。当节点在交易中作弊时，其他节点可以提交投诉。声誉计算由以下公式决定：</p><p><img src="/leoforever.github.io/2025/05/04/Reputation-system-in-P2P-computing-A-literature-review/image-20250504212236869.png" alt="Reputation"></p><p>其中<code>c(p, q)</code>表示p向q提出的投诉。这里通过P-Grid，一种分布式储存和检索方法来获取相关投诉记录，同时通过增加存储备份以防止存储投诉的节点作恶。</p><p>随后，通过多份备份计算标准化的投诉数，比较节点q收到的投诉数与其提出的投诉数的比例，如果q收到的投诉数<strong>小于</strong>q提出的投诉数乘以一个阈值因子，则认为q是可信的，否则认为q不可信(返回-1)。这个过程在计算声誉公式时会限制深度递归检查。</p><h3 id="The-EigenTrust-Algorithm-for-Reputation-Management-in-P2P-Networks"><a href="#The-EigenTrust-Algorithm-for-Reputation-Management-in-P2P-Networks" class="headerlink" title="The EigenTrust Algorithm for Reputation Management in P2P Networks"></a>The EigenTrust Algorithm for Reputation Management in P2P Networks</h3><p>本文提出了一种基于信任传递性的全局信任值计算方法：</p><p>首先，每个节点i基于与其他节点j的交互历史，计算局部信任值：</p><ul><li>$s_{ij} &#x3D; sat(i,j) - unsat(i,j)$，其中sat表示满意交互次数，unsat表示不满意交互次数</li><li>然后归一化为$c_{ij} &#x3D; max(s_{ij},0) &#x2F; \sum\limits_{j} max(s_{ij},0)$，确保值在0到1之间</li></ul><p>同时，节点i不仅考虑自己的直接经验，还会询问其信任的节点对其他节点的看法，并按照自己对这些节点的信任程度加权它们的意见：<br>$$<br>t_{ik} &#x3D; \sum\limits_{j}(c_{ij} c_{jk})<br>$$<br>通过不断迭代，最终结果会收敛到全局信任向量。</p><p>在实践中，全局信任值通过以下迭代公式计算：<br>$$<br>t(k+1) &#x3D; (1-a)C^T·t(k) + a·p<br>$$</p><ul><li>$t(k)$是第k次迭代的全局信任值向量</li><li>$C^T$是归一化局部信任矩阵C的转置</li><li>$p$是预先信任的节点分布向量（用于防止恶意集体）</li><li>$a$是一个小常数（通常为0.1或0.2），表示随机跳转到预信任节点的概率</li></ul><p>这个迭代过程会一直进行，直到t向量收敛。</p><p>另外，本文中的局部信任评分仍然由多个管理者计算和储存，管理者由DHT确定，查询时采用多数投票机制，以抵消恶意管理者的影响。</p><h3 id="PowerTrust-A-Robust-and-Scalable-Reputation-System-for-Trusted-Peer-to-Peer-Computing"><a href="#PowerTrust-A-Robust-and-Scalable-Reputation-System-for-Trusted-Peer-to-Peer-Computing" class="headerlink" title="PowerTrust: A Robust and Scalable Reputation  System for Trusted Peer-to-Peer Computing"></a>PowerTrust: A Robust and Scalable Reputation  System for Trusted Peer-to-Peer Computing</h3><p>本文中的系统主要由五大功能模块组成：</p><ul><li><strong>初始声誉聚合模块</strong>：初始声誉聚合</li><li><strong>常规随机游走模块</strong>：负责支持初始声誉聚合</li><li><strong>前瞻随机游走(LRW)模块</strong>：定期更新声誉分数</li><li><strong>分布式排名模块</strong>：与LRW协同工作，识别权力节点</li><li><strong>权力节点利用机制</strong>：利用权力节点更新全局声誉分数</li></ul><p><img src="/leoforever.github.io/2025/05/04/Reputation-system-in-P2P-computing-A-literature-review/image-20250506132440155.png" alt="PowerTrust System"></p><p>其中，TON是一个建立在整个P2P网络上的信任系统，可以用有向图表示，依赖交易的结果进行评价。</p><p><img src="/leoforever.github.io/2025/05/04/Reputation-system-in-P2P-computing-A-literature-review/image-20250506133149243.png" alt="TON"></p><p>其中，初始信誉和信誉评分的迭代过程与EigenTrust类似，但是权力节点是动态确定的，通过一种分布式排序方法动态更新全局信誉分最高的m个节点。</p><p>这种分布式排序方法使用LPH函数，将声誉值映射到哈希空间，但保持了声誉值的相对顺序，这使得系统可以通过简单地从最大哈希值开始遍历，就能找到声誉最高的节点，实际上在系统中形成了两层不同的DHT表：节点和信誉分。</p><p>最终的全局信誉迭代过程使用以下公式：</p><p>对于权力节点k：</p><p>$$<br>v_k &#x3D; (1-\alpha)\sum(v_j \cdot r_{jk}) + \frac{\alpha}{m}<br>$$<br>对于非权力节点k：<br>$$<br>v_k &#x3D; (1-\alpha)\sum(v_j \cdot r_{jk})<br>$$<br>其中：</p><ul><li>$v_k$ 是节点k的全局声誉值</li><li>$v_j$ 是节点j的全局声誉值</li><li>$r_{jk}$是节点j对节点k的本地信任分数</li><li>$alpha$ 是贪婪因子</li><li>$m$ 是权力节点的总数量</li></ul><p>这样，每一个随机游走有$\alpha$的概率直接选择权力节点，这让收敛过程在符合幂律分布的P2P系统中更快。</p><h2 id="如何评价一个信誉系统"><a href="#如何评价一个信誉系统" class="headerlink" title="如何评价一个信誉系统"></a>如何评价一个信誉系统</h2><p>信誉系统一般具有如下属性：</p><ul><li>信任基础：多次重复的交互和交互历史的清晰记录构成了可靠的信任基础</li><li>自我监督：社会规范应该由用户定义，而不是由中央权威定义</li><li>萝卜大棒：通过适当的奖惩机制，使得用户更有可能按照社会规范行事。</li><li>鲁棒性：对攻击的抵抗能力，可能包括：女巫攻击、不诚实评级、重入洗白、刷票等行为。</li><li>准确可验的评分系统</li><li>匿名性和隐私：可能促进诚实反馈</li><li>快速收敛：信誉系统应该能及时反应整个系统中的信誉情况</li><li>节点动态适应：能够适应节点动态加入和退出，能够处理冷启动、重入洗白等问题。</li><li>低开销：信誉系统不能占用过多计算资源，提高系统的可扩展性。</li></ul><h2 id="P2P分布式系统中的不良行为"><a href="#P2P分布式系统中的不良行为" class="headerlink" title="P2P分布式系统中的不良行为"></a>P2P分布式系统中的不良行为</h2><h4 id="主观恶行"><a href="#主观恶行" class="headerlink" title="主观恶行"></a>主观恶行</h4><p>实际行动中的不良行为</p><ul><li>提供虚假文件</li><li>拒绝转发或参与系统活动</li><li>窃取信息</li></ul><p>信誉评价过程中的不良行为</p><ul><li>叛徒：通过一段时间建立良好的信誉，随后借此开始恶意行为</li><li>水军：部分节点串通以增加某个节点的信誉，或者恶意诋毁其他节点</li><li>串谋：多个恶意节点互相串通，给彼此更高的信誉评分同时诋毁其他节点</li><li>洗白：通过以新身份重入系统的方式逃避前一身份积累的不良行为后果</li><li>虚票：对从未发生过的交互行为提供反馈</li><li>静默：使用服务或者发生交互后不为信誉系统提供任何有效评价</li><li>DoS：对整个信誉系统的系统级攻击，比如在区块链系统中利用智能合约的漏洞</li></ul><h4 id="客观恶行"><a href="#客观恶行" class="headerlink" title="客观恶行"></a>客观恶行</h4><ul><li><p>网络环境问题：速度、质量……</p></li><li><p>文件质量问题</p></li></ul><h3 id="实验建模"><a href="#实验建模" class="headerlink" title="实验建模"></a>实验建模</h3><h4 id="分布式网络模型"><a href="#分布式网络模型" class="headerlink" title="分布式网络模型"></a>分布式网络模型</h4><ul><li><strong>随机图模型</strong>：节点之间的连接随机建立</li><li><strong>幂律分布</strong>：节点连接数遵循幂律分布，模拟真实P2P网络中的连接特性</li><li><strong>超级节点</strong>：部分节点作为超级节点，连接数远高于普通节点</li></ul><h4 id="节点类型"><a href="#节点类型" class="headerlink" title="节点类型"></a>节点类型</h4><ul><li><strong>诚实节点</strong>：提供真实文件，给出真实评价</li><li><strong>简单恶意节点</strong>：提供不真实文件，但不操纵信任系统</li><li><strong>集体恶意节点</strong>：相互之间给予高评价，对诚实节点给予低评价</li><li><strong>伪装恶意节点</strong>：策略性地提供一些真实文件以获取信任，然后提供不真实文件</li><li><strong>欺骗性恶意节点</strong>：针对不同查询提供不同质量的文件，试图混淆信任系统</li></ul>]]></content>
+    
+    
+    <categories>
+      
+      <category>Distributed Systems</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>P2P</tag>
+      
+      <tag>Reputation</tag>
+      
+      <tag>Literature Review</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>6.824 Introduction</title>
     <link href="/leoforever.github.io/2025/05/04/6-824-Introduction/"/>
     <url>/leoforever.github.io/2025/05/04/6-824-Introduction/</url>
